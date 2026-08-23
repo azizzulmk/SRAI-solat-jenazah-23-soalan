@@ -7,79 +7,89 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eef7f1,#f7f3e8);color:#20332a}
-.container{max-width:850px;margin:0 auto;padding:22px 16px 40px}
+.container{max-width:900px;margin:auto;padding:20px 15px 40px}
 .card{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.10);padding:26px}
 h1{margin:0 0 8px;text-align:center;color:#176b4d}
-.subtitle{text-align:center;margin:0 0 22px;color:#66736d}
-.progress-wrap{background:#e9eee9;border-radius:20px;height:12px;overflow:hidden;margin-bottom:18px}
-.progress{height:100%;width:0%;background:#2c9a6a;transition:.25s}
+.subtitle{text-align:center;color:#66736d;margin-bottom:22px}
+.progress-wrap{height:12px;background:#e8eee9;border-radius:20px;overflow:hidden;margin-bottom:18px}
+.progress{height:100%;background:#20865b;width:0;transition:.25s}
 .top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px;font-weight:bold}
 .badge{background:#e8f5ee;color:#176b4d;padding:7px 12px;border-radius:20px;font-size:14px}
-.question{font-size:21px;line-height:1.6;font-weight:700;margin-bottom:20px}
+.question{font-size:21px;line-height:1.65;font-weight:700;margin-bottom:20px}
 .option{display:block;width:100%;text-align:left;border:2px solid #d9e1dc;background:#fff;border-radius:13px;padding:13px 15px;margin:10px 0;font-size:16px;cursor:pointer;transition:.2s}
 .option:hover{border-color:#62ad88;background:#f5fbf7}
 .option.selected{border-color:#20865b;background:#eaf7f0}
 .option input{margin-right:10px;accent-color:#20865b}
-.fill-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;line-height:2}
-.blank{width:170px;max-width:100%;border:0;border-bottom:2px solid #20865b;outline:none;padding:7px 8px;font-size:17px;background:#f7fbf8}
-.btns{display:flex;justify-content:space-between;gap:10px;margin-top:25px}
-button{border:0;border-radius:12px;padding:12px 20px;font-size:16px;font-weight:bold;cursor:pointer}
+.fill-sentence{font-size:19px;line-height:2.2;margin-bottom:20px}
+.blank-slot{display:inline-flex;min-width:125px;height:42px;border:2px dashed #20865b;border-radius:9px;background:#f5fbf7;vertical-align:middle;align-items:center;justify-content:center;padding:3px 10px;margin:2px 4px;cursor:pointer;color:#176b4d;font-weight:700}
+.blank-slot.empty{color:#7d8982;font-weight:normal}
+.word-title{font-weight:bold;margin:15px 0 8px;color:#46564d}
+.word-bank{display:flex;flex-wrap:wrap;gap:9px}
+.word{border:2px solid #cdd8d1;background:#fff;border-radius:10px;padding:10px 13px;cursor:pointer;font-size:15px}
+.word:hover{border-color:#20865b;background:#f5fbf7}
+.word.used{opacity:.4;cursor:not-allowed}
+.word.selected{border-color:#20865b;background:#dff2e8}
+.fill-help{font-size:13px;color:#6d7872;margin-top:10px}
+.btns{display:flex;justify-content:space-between;gap:10px;margin-top:26px}
+button.nav{border:0;border-radius:12px;padding:12px 20px;font-size:16px;font-weight:bold;cursor:pointer}
 #prev{background:#e8ece9;color:#3c4b43}
 #next,#submit,#restart{background:#20865b;color:white}
 button:disabled{opacity:.45;cursor:not-allowed}
 #result{display:none;text-align:center}
 .score{font-size:46px;font-weight:800;color:#20865b;margin:18px 0 8px}
 .note{color:#647169;margin-bottom:24px}
-.small{font-size:13px;color:#7b8780;margin-top:15px;text-align:center}
+@media(max-width:600px){.card{padding:19px}.question{font-size:18px}.fill-sentence{font-size:17px}.blank-slot{min-width:105px}}
 </style>
 </head>
 <body>
 <div class="container">
 <div class="card" id="quizCard">
 <h1>Kuiz Interaktif Solat Jenazah</h1>
-<p class="subtitle">Jawab semua soalan. Jawapan betul tidak akan ditunjukkan sehingga kuiz tamat.</p>
+<p class="subtitle">Klik jawapan. Untuk isi tempat kosong, klik perkataan kemudian klik tempat kosong.</p>
 <div class="progress-wrap"><div class="progress" id="progress"></div></div>
-<div class="top"><span id="counter">Soalan 1 / 23</span><span class="badge" id="typeBadge">Pilihan Jawapan</span></div>
+<div class="top"><span id="counter"></span><span class="badge" id="typeBadge"></span></div>
 <div id="questionArea"></div>
 <div class="btns">
-<button id="prev" onclick="prevQuestion()">Kembali</button>
-<button id="next" onclick="nextQuestion()">Seterusnya</button>
-<button id="submit" onclick="finishQuiz()" style="display:none">Semak Jawapan</button>
+<button class="nav" id="prev" onclick="prevQuestion()">Kembali</button>
+<button class="nav" id="next" onclick="nextQuestion()">Seterusnya</button>
+<button class="nav" id="submit" onclick="finishQuiz()" style="display:none">Semak Jawapan</button>
 </div>
-<p class="small">Tiada petunjuk jawapan diberikan semasa menjawab.</p>
 </div>
 
 <div class="card" id="result">
 <h1>Kuiz Tamat!</h1>
 <div class="score" id="score"></div>
 <p class="note" id="resultNote"></p>
-<button id="restart" onclick="restartQuiz()">Jawab Semula</button>
+<button class="nav" id="restart" onclick="restartQuiz()">Jawab Semula</button>
 </div>
 </div>
 
 <script>
-const questions = [{"type": "fill", "q": "Solat jenazah ialah solat yang dilakukan oleh __________ yang __________ terhadap orang Islam yang telah __________ dunia.", "answers": ["orang islam", "hidup", "meninggal"]}, {"type": "fill", "q": "Hukum mendirikan solat jenazah ialah __________ __________.", "answers": ["fardu", "kifayah"]}, {"type": "mcq", "q": "Solat jenazah boleh didirikan secara:", "options": ["Berjemaah sahaja", "Bersendirian sahaja", "Berjemaah atau bersendirian", "Berdua sahaja"], "answer": 2}, {"type": "tf", "q": "Solat jenazah jika didirikan secara berjemaah lebih baik.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "fill", "q": "Solat jenazah jika didirikan secara __________ lebih afdal.", "answers": ["berjemaah"]}, {"type": "mcq", "q": "Ketika solat jenazah, bilangan takbir ialah:", "options": ["Dua kali", "Tiga kali", "Empat kali", "Lima kali"], "answer": 2}, {"type": "tf", "q": "Dalam solat jenazah, terdapat rukuk dan sujud selepas takbir.", "options": ["Betul", "Salah"], "answer": 1}, {"type": "mcq", "q": "Berapakah bilangan takbir dalam solat jenazah termasuk takbiratul ihram?", "options": ["2 kali", "3 kali", "4 kali", "5 kali"], "answer": 2}, {"type": "fill", "q": "Rukun pertama solat jenazah ialah __________.", "answers": ["niat"]}, {"type": "tf", "q": "Berdiri bagi orang yang berkemampuan merupakan salah satu rukun solat jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah yang dibaca setelah takbir yang kedua?", "options": ["Surah al-Fatihah", "Selawat ke atas Nabi", "Doa untuk jenazah", "Salam"], "answer": 1}, {"type": "mcq", "q": "Apakah yang dilakukan selepas takbir yang ketiga dalam solat jenazah?", "options": ["Membaca surah al-Fatihah", "Membaca selawat ke atas Nabi", "Membaca doa untuk jenazah", "Memberi salam"], "answer": 2}, {"type": "fill", "q": "Surah al-Fatihah dibaca setelah __________ __________.", "answers": ["takbiratul ihram"]}, {"type": "tf", "q": "Memberi salam setelah takbir yang keempat merupakan salah satu rukun solat jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah tujuan solat jenazah dari sudut memohon sesuatu untuk orang yang telah meninggal dunia?", "options": ["Memohon rezeki kepada keluarga", "Memohon keampunan, kerahmatan dan keselamatan", "Memohon kesihatan kepada jenazah", "Memohon supaya jenazah kembali hidup"], "answer": 1}, {"type": "fill", "q": "Solat jenazah menjadi penghormatan kepada jenazah sebelum __________.", "answers": ["dikebumikan"]}, {"type": "tf", "q": "Solat jenazah mengingatkan umat Islam tentang kematian dan dunia yang sementara.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah motivasi yang diberikan melalui solat jenazah?", "options": ["Bersedia menghadapi kematian dan memperbanyak amal", "Bersedia menghadapi peperiksaan dan memperbanyak belajar", "Bersedia untuk bermusafir dan memperbanyak rezeki", "Bersedia untuk bekerja dan memperbanyak harta"], "answer": 0}, {"type": "fill", "q": "Solat jenazah merupakan suatu bentuk solidariti dan sokongan moral kepada keluarga jenazah yang __________.", "answers": ["ditinggalkan"]}, {"type": "fill", "q": "Solat jenazah membolehkan __________ dalam diri orang yang masih hidup.", "answers": ["keinsafan"]}, {"type": "mcq", "q": "Apakah yang diperoleh oleh jenazah melalui solat jenazah?", "options": ["Rahmat dan keampunan daripada Allah", "Rezeki dan kesihatan daripada Allah", "Kekuatan dan keberanian daripada Allah", "Kesenangan hidup daripada Allah"], "answer": 0}, {"type": "tf", "q": "Solat jenazah dapat mengeratkan hubungan silaturahim antara masyarakat dengan keluarga jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah kesan solat jenazah terhadap ahli keluarga jenazah?", "options": ["Menggembirakan hati ahli keluarga", "Menenangkan hati ahli keluarga atas musibah kematian", "Menghilangkan semua kesedihan ahli keluarga", "Menambahkan hubungan kekeluargaan"], "answer": 1}];
+const questions = [{"type": "fill", "q": "Solat jenazah ialah solat yang dilakukan oleh __________ yang __________ terhadap orang Islam yang telah __________ dunia.", "answers": ["orang islam", "hidup", "meninggal"], "distractors": ["sakit", "berjalan", "tidur", "lahir"]}, {"type": "fill", "q": "Hukum mendirikan solat jenazah ialah __________ __________.", "answers": ["fardu", "kifayah"], "distractors": ["fardu ain", "sunat", "harus", "wajib ain"]}, {"type": "mcq", "q": "Solat jenazah boleh didirikan secara:", "options": ["Berjemaah sahaja", "Bersendirian sahaja", "Berjemaah atau bersendirian", "Berdua sahaja"], "answer": 2}, {"type": "tf", "q": "Solat jenazah jika didirikan secara berjemaah lebih baik.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "fill", "q": "Solat jenazah jika didirikan secara __________ lebih afdal.", "answers": ["berjemaah"], "distractors": ["bersendirian", "berdua", "sendirian", "seorang"]}, {"type": "mcq", "q": "Ketika solat jenazah, bilangan takbir ialah:", "options": ["Dua kali", "Tiga kali", "Empat kali", "Lima kali"], "answer": 2}, {"type": "tf", "q": "Dalam solat jenazah, terdapat rukuk dan sujud selepas takbir.", "options": ["Betul", "Salah"], "answer": 1}, {"type": "mcq", "q": "Berapakah bilangan takbir dalam solat jenazah termasuk takbiratul ihram?", "options": ["2 kali", "3 kali", "4 kali", "5 kali"], "answer": 2}, {"type": "fill", "q": "Rukun pertama solat jenazah ialah __________.", "answers": ["niat"], "distractors": ["salam", "rukuk", "sujud", "doa"]}, {"type": "tf", "q": "Berdiri bagi orang yang berkemampuan merupakan salah satu rukun solat jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah yang dibaca setelah takbir yang kedua?", "options": ["Surah al-Fatihah", "Selawat ke atas Nabi", "Doa untuk jenazah", "Salam"], "answer": 1}, {"type": "mcq", "q": "Apakah yang dilakukan selepas takbir yang ketiga dalam solat jenazah?", "options": ["Membaca surah al-Fatihah", "Membaca selawat ke atas Nabi", "Membaca doa untuk jenazah", "Memberi salam"], "answer": 2}, {"type": "fill", "q": "Surah al-Fatihah dibaca setelah __________ __________.", "answers": ["takbiratul ihram"], "distractors": ["takbir kedua", "takbir ketiga", "takbir keempat", "salam"]}, {"type": "tf", "q": "Memberi salam setelah takbir yang keempat merupakan salah satu rukun solat jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah tujuan solat jenazah dari sudut memohon sesuatu untuk orang yang telah meninggal dunia?", "options": ["Memohon rezeki kepada keluarga", "Memohon keampunan, kerahmatan dan keselamatan", "Memohon kesihatan kepada jenazah", "Memohon supaya jenazah kembali hidup"], "answer": 1}, {"type": "fill", "q": "Solat jenazah menjadi penghormatan kepada jenazah sebelum __________.", "answers": ["dikebumikan"], "distractors": ["dilahirkan", "disolatkan", "dimandikan", "diziarahi"]}, {"type": "tf", "q": "Solat jenazah mengingatkan umat Islam tentang kematian dan dunia yang sementara.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah motivasi yang diberikan melalui solat jenazah?", "options": ["Bersedia menghadapi kematian dan memperbanyak amal", "Bersedia menghadapi peperiksaan dan memperbanyak belajar", "Bersedia untuk bermusafir dan memperbanyak rezeki", "Bersedia untuk bekerja dan memperbanyak harta"], "answer": 0}, {"type": "fill", "q": "Solat jenazah merupakan suatu bentuk solidariti dan sokongan moral kepada keluarga jenazah yang __________.", "answers": ["ditinggalkan"], "distractors": ["dilupakan", "dijemput", "dilahirkan", "disambut"]}, {"type": "mcq", "q": "Apakah yang diperoleh oleh jenazah melalui solat jenazah?", "options": ["Rahmat dan keampunan daripada Allah", "Rezeki dan kesihatan daripada Allah", "Kekuatan dan keberanian daripada Allah", "Kesenangan hidup daripada Allah"], "answer": 0}, {"type": "tf", "q": "Solat jenazah dapat mengeratkan hubungan silaturahim antara masyarakat dengan keluarga jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah kesan solat jenazah terhadap ahli keluarga jenazah?", "options": ["Menggembirakan hati ahli keluarga", "Menenangkan hati ahli keluarga atas musibah kematian", "Menghilangkan semua kesedihan ahli keluarga", "Menambahkan hubungan kekeluargaan"], "answer": 1}];
 let current = 0;
 let answers = Array(questions.length).fill(null);
+let selectedWord = null;
 
 function typeName(t) {
   return t === 'mcq' ? 'Pilihan Jawapan' : t === 'tf' ? 'Betul / Salah' : 'Isi Tempat Kosong';
 }
 
 function render() {
+  selectedWord = null;
   const q = questions[current];
   document.getElementById('counter').textContent = `Soalan ${current+1} / ${questions.length}`;
   document.getElementById('typeBadge').textContent = typeName(q.type);
   document.getElementById('progress').style.width = `${((current+1)/questions.length)*100}%`;
+
   const area = document.getElementById('questionArea');
   area.innerHTML = '';
 
-  const title = document.createElement('div');
-  title.className = 'question';
-  title.textContent = q.q;
-  area.appendChild(title);
+  if (q.type !== 'fill') {
+    const title = document.createElement('div');
+    title.className = 'question';
+    title.textContent = q.q;
+    area.appendChild(title);
 
-  if (q.type === 'mcq' || q.type === 'tf') {
     q.options.forEach((opt, i) => {
       const label = document.createElement('label');
       label.className = 'option' + (answers[current] === i ? ' selected' : '');
@@ -91,27 +101,70 @@ function render() {
       area.appendChild(label);
     });
   } else {
+    const title = document.createElement('div');
+    title.className = 'question';
+    title.textContent = 'Lengkapkan ayat berikut:';
+    area.appendChild(title);
+
     const row = document.createElement('div');
-    row.className = 'fill-row';
+    row.className = 'fill-sentence';
     const parts = q.q.split('__________');
+    const vals = answers[current] || Array(q.answers.length).fill(null);
+
     parts.forEach((part, i) => {
       const span = document.createElement('span');
       span.textContent = part;
       row.appendChild(span);
-      if (i < parts.length-1) {
-        const input = document.createElement('input');
-        input.className = 'blank';
-        input.type = 'text';
-        input.autocomplete = 'off';
-        input.value = (answers[current] && answers[current][i]) || '';
-        input.addEventListener('input', e => {
-          if (!answers[current]) answers[current] = [];
-          answers[current][i] = e.target.value;
-        });
-        row.appendChild(input);
+
+      if (i < parts.length - 1) {
+        const slot = document.createElement('span');
+        slot.className = 'blank-slot ' + (vals[i] ? '' : 'empty');
+        slot.textContent = vals[i] || 'klik di sini';
+        slot.onclick = () => {
+          if (selectedWord !== null) {
+            if (!answers[current]) answers[current] = Array(q.answers.length).fill(null);
+            answers[current][i] = selectedWord;
+            selectedWord = null;
+            render();
+          }
+        };
+        row.appendChild(slot);
       }
     });
     area.appendChild(row);
+
+    const title2 = document.createElement('div');
+    title2.className = 'word-title';
+    title2.textContent = 'Pilihan jawapan:';
+    area.appendChild(title2);
+
+    const bank = document.createElement('div');
+    bank.className = 'word-bank';
+
+    const valsNow = answers[current] || [];
+    const allWords = [...q.answers, ...q.distractors];
+    const shuffled = [...allWords].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach(word => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'word' + (valsNow.includes(word) ? ' used' : '');
+      btn.textContent = word;
+      if (!valsNow.includes(word)) {
+        btn.onclick = () => {
+          selectedWord = word;
+          document.querySelectorAll('.word').forEach(x => x.classList.remove('selected'));
+          btn.classList.add('selected');
+        };
+      }
+      bank.appendChild(btn);
+    });
+    area.appendChild(bank);
+
+    const help = document.createElement('div');
+    help.className = 'fill-help';
+    help.textContent = 'Cara jawab: klik satu perkataan, kemudian klik tempat kosong yang hendak diisi.';
+    area.appendChild(help);
   }
 
   document.getElementById('prev').disabled = current === 0;
@@ -150,11 +203,11 @@ function finishQuiz() {
       if (ok) score++;
     }
   });
+
   document.getElementById('quizCard').style.display='none';
   document.getElementById('result').style.display='block';
   document.getElementById('score').textContent = `${score} / ${questions.length}`;
-  const pct = Math.round(score/questions.length*100);
-  document.getElementById('resultNote').textContent = `Markah anda: ${pct}%.`;
+  document.getElementById('resultNote').textContent = `Markah anda: ${Math.round(score/questions.length*100)}%.`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function restartQuiz() {
