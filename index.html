@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuiz Interaktif Solat Jenazah</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eef7f1,#f7f3e8);color:#20332a}
+.container{max-width:850px;margin:0 auto;padding:22px 16px 40px}
+.card{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.10);padding:26px}
+h1{margin:0 0 8px;text-align:center;color:#176b4d}
+.subtitle{text-align:center;margin:0 0 22px;color:#66736d}
+.progress-wrap{background:#e9eee9;border-radius:20px;height:12px;overflow:hidden;margin-bottom:18px}
+.progress{height:100%;width:0%;background:#2c9a6a;transition:.25s}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px;font-weight:bold}
+.badge{background:#e8f5ee;color:#176b4d;padding:7px 12px;border-radius:20px;font-size:14px}
+.question{font-size:21px;line-height:1.6;font-weight:700;margin-bottom:20px}
+.option{display:block;width:100%;text-align:left;border:2px solid #d9e1dc;background:#fff;border-radius:13px;padding:13px 15px;margin:10px 0;font-size:16px;cursor:pointer;transition:.2s}
+.option:hover{border-color:#62ad88;background:#f5fbf7}
+.option.selected{border-color:#20865b;background:#eaf7f0}
+.option input{margin-right:10px;accent-color:#20865b}
+.fill-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;line-height:2}
+.blank{width:170px;max-width:100%;border:0;border-bottom:2px solid #20865b;outline:none;padding:7px 8px;font-size:17px;background:#f7fbf8}
+.btns{display:flex;justify-content:space-between;gap:10px;margin-top:25px}
+button{border:0;border-radius:12px;padding:12px 20px;font-size:16px;font-weight:bold;cursor:pointer}
+#prev{background:#e8ece9;color:#3c4b43}
+#next,#submit,#restart{background:#20865b;color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+#result{display:none;text-align:center}
+.score{font-size:46px;font-weight:800;color:#20865b;margin:18px 0 8px}
+.note{color:#647169;margin-bottom:24px}
+.small{font-size:13px;color:#7b8780;margin-top:15px;text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card" id="quizCard">
+<h1>Kuiz Interaktif Solat Jenazah</h1>
+<p class="subtitle">Jawab semua soalan. Jawapan betul tidak akan ditunjukkan sehingga kuiz tamat.</p>
+<div class="progress-wrap"><div class="progress" id="progress"></div></div>
+<div class="top"><span id="counter">Soalan 1 / 23</span><span class="badge" id="typeBadge">Pilihan Jawapan</span></div>
+<div id="questionArea"></div>
+<div class="btns">
+<button id="prev" onclick="prevQuestion()">Kembali</button>
+<button id="next" onclick="nextQuestion()">Seterusnya</button>
+<button id="submit" onclick="finishQuiz()" style="display:none">Semak Jawapan</button>
+</div>
+<p class="small">Tiada petunjuk jawapan diberikan semasa menjawab.</p>
+</div>
+
+<div class="card" id="result">
+<h1>Kuiz Tamat!</h1>
+<div class="score" id="score"></div>
+<p class="note" id="resultNote"></p>
+<button id="restart" onclick="restartQuiz()">Jawab Semula</button>
+</div>
+</div>
+
+<script>
+const questions = [{"type": "fill", "q": "Solat jenazah ialah solat yang dilakukan oleh __________ yang __________ terhadap orang Islam yang telah __________ dunia.", "answers": ["orang islam", "hidup", "meninggal"]}, {"type": "fill", "q": "Hukum mendirikan solat jenazah ialah __________ __________.", "answers": ["fardu", "kifayah"]}, {"type": "mcq", "q": "Solat jenazah boleh didirikan secara:", "options": ["Berjemaah sahaja", "Bersendirian sahaja", "Berjemaah atau bersendirian", "Berdua sahaja"], "answer": 2}, {"type": "tf", "q": "Solat jenazah jika didirikan secara berjemaah lebih baik.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "fill", "q": "Solat jenazah jika didirikan secara __________ lebih afdal.", "answers": ["berjemaah"]}, {"type": "mcq", "q": "Ketika solat jenazah, bilangan takbir ialah:", "options": ["Dua kali", "Tiga kali", "Empat kali", "Lima kali"], "answer": 2}, {"type": "tf", "q": "Dalam solat jenazah, terdapat rukuk dan sujud selepas takbir.", "options": ["Betul", "Salah"], "answer": 1}, {"type": "mcq", "q": "Berapakah bilangan takbir dalam solat jenazah termasuk takbiratul ihram?", "options": ["2 kali", "3 kali", "4 kali", "5 kali"], "answer": 2}, {"type": "fill", "q": "Rukun pertama solat jenazah ialah __________.", "answers": ["niat"]}, {"type": "tf", "q": "Berdiri bagi orang yang berkemampuan merupakan salah satu rukun solat jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah yang dibaca setelah takbir yang kedua?", "options": ["Surah al-Fatihah", "Selawat ke atas Nabi", "Doa untuk jenazah", "Salam"], "answer": 1}, {"type": "mcq", "q": "Apakah yang dilakukan selepas takbir yang ketiga dalam solat jenazah?", "options": ["Membaca surah al-Fatihah", "Membaca selawat ke atas Nabi", "Membaca doa untuk jenazah", "Memberi salam"], "answer": 2}, {"type": "fill", "q": "Surah al-Fatihah dibaca setelah __________ __________.", "answers": ["takbiratul ihram"]}, {"type": "tf", "q": "Memberi salam setelah takbir yang keempat merupakan salah satu rukun solat jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah tujuan solat jenazah dari sudut memohon sesuatu untuk orang yang telah meninggal dunia?", "options": ["Memohon rezeki kepada keluarga", "Memohon keampunan, kerahmatan dan keselamatan", "Memohon kesihatan kepada jenazah", "Memohon supaya jenazah kembali hidup"], "answer": 1}, {"type": "fill", "q": "Solat jenazah menjadi penghormatan kepada jenazah sebelum __________.", "answers": ["dikebumikan"]}, {"type": "tf", "q": "Solat jenazah mengingatkan umat Islam tentang kematian dan dunia yang sementara.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah motivasi yang diberikan melalui solat jenazah?", "options": ["Bersedia menghadapi kematian dan memperbanyak amal", "Bersedia menghadapi peperiksaan dan memperbanyak belajar", "Bersedia untuk bermusafir dan memperbanyak rezeki", "Bersedia untuk bekerja dan memperbanyak harta"], "answer": 0}, {"type": "fill", "q": "Solat jenazah merupakan suatu bentuk solidariti dan sokongan moral kepada keluarga jenazah yang __________.", "answers": ["ditinggalkan"]}, {"type": "fill", "q": "Solat jenazah membolehkan __________ dalam diri orang yang masih hidup.", "answers": ["keinsafan"]}, {"type": "mcq", "q": "Apakah yang diperoleh oleh jenazah melalui solat jenazah?", "options": ["Rahmat dan keampunan daripada Allah", "Rezeki dan kesihatan daripada Allah", "Kekuatan dan keberanian daripada Allah", "Kesenangan hidup daripada Allah"], "answer": 0}, {"type": "tf", "q": "Solat jenazah dapat mengeratkan hubungan silaturahim antara masyarakat dengan keluarga jenazah.", "options": ["Betul", "Salah"], "answer": 0}, {"type": "mcq", "q": "Apakah kesan solat jenazah terhadap ahli keluarga jenazah?", "options": ["Menggembirakan hati ahli keluarga", "Menenangkan hati ahli keluarga atas musibah kematian", "Menghilangkan semua kesedihan ahli keluarga", "Menambahkan hubungan kekeluargaan"], "answer": 1}];
+let current = 0;
+let answers = Array(questions.length).fill(null);
+
+function typeName(t) {
+  return t === 'mcq' ? 'Pilihan Jawapan' : t === 'tf' ? 'Betul / Salah' : 'Isi Tempat Kosong';
+}
+
+function render() {
+  const q = questions[current];
+  document.getElementById('counter').textContent = `Soalan ${current+1} / ${questions.length}`;
+  document.getElementById('typeBadge').textContent = typeName(q.type);
+  document.getElementById('progress').style.width = `${((current+1)/questions.length)*100}%`;
+  const area = document.getElementById('questionArea');
+  area.innerHTML = '';
+
+  const title = document.createElement('div');
+  title.className = 'question';
+  title.textContent = q.q;
+  area.appendChild(title);
+
+  if (q.type === 'mcq' || q.type === 'tf') {
+    q.options.forEach((opt, i) => {
+      const label = document.createElement('label');
+      label.className = 'option' + (answers[current] === i ? ' selected' : '');
+      label.innerHTML = `<input type="radio" name="answer" value="${i}" ${answers[current]===i?'checked':''}> ${opt}`;
+      label.querySelector('input').addEventListener('change', () => {
+        answers[current] = i;
+        render();
+      });
+      area.appendChild(label);
+    });
+  } else {
+    const row = document.createElement('div');
+    row.className = 'fill-row';
+    const parts = q.q.split('__________');
+    parts.forEach((part, i) => {
+      const span = document.createElement('span');
+      span.textContent = part;
+      row.appendChild(span);
+      if (i < parts.length-1) {
+        const input = document.createElement('input');
+        input.className = 'blank';
+        input.type = 'text';
+        input.autocomplete = 'off';
+        input.value = (answers[current] && answers[current][i]) || '';
+        input.addEventListener('input', e => {
+          if (!answers[current]) answers[current] = [];
+          answers[current][i] = e.target.value;
+        });
+        row.appendChild(input);
+      }
+    });
+    area.appendChild(row);
+  }
+
+  document.getElementById('prev').disabled = current === 0;
+  document.getElementById('next').style.display = current === questions.length-1 ? 'none' : 'block';
+  document.getElementById('submit').style.display = current === questions.length-1 ? 'block' : 'none';
+}
+
+function nextQuestion() {
+  if (current < questions.length-1) {
+    current++;
+    render();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+function prevQuestion() {
+  if (current > 0) {
+    current--;
+    render();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+function normalize(s) {
+  return String(s || '').trim().toLowerCase().replace(/[’']/g,"'").replace(/\s+/g,' ');
+}
+function finishQuiz() {
+  let score = 0;
+  questions.forEach((q,i) => {
+    if (q.type === 'mcq' || q.type === 'tf') {
+      if (answers[i] === q.answer) score++;
+    } else {
+      const arr = answers[i] || [];
+      let ok = true;
+      q.answers.forEach((a,j) => {
+        if (normalize(arr[j]) !== normalize(a)) ok = false;
+      });
+      if (ok) score++;
+    }
+  });
+  document.getElementById('quizCard').style.display='none';
+  document.getElementById('result').style.display='block';
+  document.getElementById('score').textContent = `${score} / ${questions.length}`;
+  const pct = Math.round(score/questions.length*100);
+  document.getElementById('resultNote').textContent = `Markah anda: ${pct}%.`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function restartQuiz() {
+  current = 0;
+  answers = Array(questions.length).fill(null);
+  document.getElementById('result').style.display='none';
+  document.getElementById('quizCard').style.display='block';
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+render();
+</script>
+</body>
+</html>
